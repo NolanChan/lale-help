@@ -1,0 +1,47 @@
+- header = []
+- header << User.human_attribute_name(:name)
+- header << User.human_attribute_name(:working_groups)
+- header << User.human_attribute_name(:address)
+- header << User.human_attribute_name(:phone)
+- header << User.human_attribute_name(:email)
+
+- if controller.controller_name == 'members'
+  - header <<  User.human_attribute_name(:created_at)
+  - if can?(:edit_accreditation, members.first, current_circle)
+    - header << User.human_attribute_name(:accredited_until)
+- header << User.human_attribute_name(:last_login)
+- if can?(:manage, current_circle) && controller.controller_name == 'members'
+  - header << t('circle.members.list.help_provided')
+  - header << t('circle.members.list.last_help_provided')
+
+= CSV.generate_line(header).html_safe
+
+- members.each do |user|
+  - presenter = MemberPresenter.new(user, self, circle: current_circle)
+
+  - line = []
+
+  - line << user.name
+  - line << user.working_groups.for_circle(current_circle).map { |wg| (wg.name) }.join("; ")
+  - line << user.address.full_address
+
+  - number = []
+  - if user.mobile_phone.present?
+    - number <<  "M: #{user.mobile_phone}"
+  - if user.home_phone.present?
+    - number <<  "H: #{user.home_phone}"
+  - line << number.join("; ")
+  - line << user.identity.email
+
+  - if controller.controller_name == 'members'
+    - line << presenter.member_since(format: :default)
+    - if can?(:edit_accreditation, presenter.model, current_circle)
+      - line << presenter.accredited_until(format: :default)
+
+  - line << presenter.last_login(format: :default)
+
+  - if can?(:manage, current_circle) && controller.controller_name == 'members'
+    - line << presenter.help_provided_count
+    - line << presenter.link_to_last_helped_item
+
+  = CSV.generate_line(line).html_safe
