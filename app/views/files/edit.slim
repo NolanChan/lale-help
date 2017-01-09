@@ -1,5 +1,16 @@
 h1= t('.header')
 
+
+.twitter-wrapper
+  .twitter-widget
+    .user-info
+      img src="https://cloud.githubusercontent.com/assets/14217285/21173259/22a1ae52-c1d7-11e6-9570-cd504acde6c3.png" /
+      .text-info
+        p Pretty File Name
+        .data-info
+          p Mime Type, doc size
+          p Uploaded by/ uploaded on
+
 = form_for @form, url: file_path(@form.file_upload.id, circle_id: current_circle.id) do |f|
   = f.hidden_field :redirect_path
 
